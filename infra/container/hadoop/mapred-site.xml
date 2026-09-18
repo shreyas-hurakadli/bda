@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<configuration>
+  <property>
+    <name>mapreduce.framework.name</name>
+    <value>local</value>
+  </property>
+  <property>
+    <name>mapreduce.task.io.sort.mb</name>
+    <value>16</value>
+  </property>
+  <property>
+    <name>mapreduce.map.java.opts</name>
+    <value>-Xmx768m</value>
+  </property>
+  <property>
+    <name>mapreduce.reduce.java.opts</name>
+    <value>-Xmx768m</value>
+  </property>
+</configuration>

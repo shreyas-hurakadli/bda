@@ -1,0 +1,6 @@
+.runtime/
+metastore_db/
+derby.log
+spark-warehouse/
+*.log
+__pycache__/
