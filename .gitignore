@@ -4,3 +4,4 @@ derby.log
 spark-warehouse/
 *.log
 __pycache__/
+.resume

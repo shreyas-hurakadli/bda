@@ -1,0 +1,5 @@
+podman run --rm -it \
+    -v "$PWD:/workspace:Z" \
+    -w /workspace \
+    student-warning-bda:local \
+    bash
