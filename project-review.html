@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student Performance Warning System — Project Overview</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --border: #2d3a4f;
+      --text: #e7ecf3;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-dim: #0ea5e9;
+      --high: #f87171;
+      --medium: #fbbf24;
+      --low: #4ade80;
+      --code-bg: #0d1117;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      background: linear-gradient(135deg, #1e3a5f 0%, var(--surface) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 1.5rem;
+    }
+    header h1 { margin: 0 0 0.5rem; font-size: 1.75rem; font-weight: 600; }
+    header p { margin: 0; color: var(--muted); max-width: 52rem; }
+    main { max-width: 52rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+    h2 {
+      font-size: 1.25rem;
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--accent);
+    }
+    h3 { font-size: 1rem; margin: 1.5rem 0 0.75rem; color: var(--text); }
+    p, li { color: var(--muted); }
+    li { margin: 0.35rem 0; }
+    strong { color: var(--text); font-weight: 600; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+    .pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      color: var(--accent);
+    }
+    pre, code {
+      font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+      font-size: 0.85rem;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      color: #c9d1d9;
+    }
+    code { background: var(--code-bg); padding: 0.15rem 0.4rem; border-radius: 4px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+    }
+    th { background: var(--surface); color: var(--text); }
+    td { color: var(--muted); }
+    .flow {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      white-space: pre;
+      color: var(--muted);
+    }
+    .risk-high { color: var(--high); }
+    .risk-medium { color: var(--medium); }
+    .risk-low { color: var(--low); }
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    a { color: var(--accent-dim); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Student Performance Warning System</h1>
+    <p>
+      Big-data course project: ingest UCI student performance data on Hadoop HDFS,
+      transform with Spark, expose analytics through Hive, and flag at-risk students
+      using transparent, rule-based logic—not ML model accuracy.
+    </p>
+    <div class="pill-row">
+      <span class="pill">Hadoop HDFS</span>
+      <span class="pill">Apache Spark 3.5</span>
+      <span class="pill">Apache Hive 3.1</span>
+      <span class="pill">Docker / Podman</span>
+    </div>
+  </header>
+
+  <main>
+    <h2>Goal</h2>
+    <p>
+      Build a review-ready pipeline that demonstrates classic data-engineering patterns:
+      landing → curated → mart storage, distributed ETL, partitioned Parquet, external Hive
+      tables, and SQL reports for academic intervention lists.
+    </p>
+
+    <h2>One-line pipeline</h2>
+    <div class="flow">local CSV → HDFS landing → Spark curated Parquet → Spark features + risk flags
+  → HDFS mart Parquet → Hive external tables/views → demo SQL warnings</div>
+
+    <h2>Dataset</h2>
+    <ul>
+      <li><strong>Source:</strong> UCI Student Performance (<code>student+performance/student/</code>)</li>
+      <li><strong>Files:</strong> <code>student-mat.csv</code> (Math), <code>student-por.csv</code> (Portuguese), <code>student.txt</code> (dictionary)</li>
+      <li><strong>Format:</strong> Semicolon-delimited CSV, header row, quoted strings; 33 shared columns including grades G1, G2, G3 (0–20)</li>
+      <li><strong>Derived:</strong> Spark adds <code>course_id</code> = MAT or POR and unions both courses (~1044 rows after ingest)</li>
+    </ul>
+
+    <h2>HDFS layout</h2>
+    <table>
+      <thead>
+        <tr><th>Layer</th><th>Path</th><th>Produced by</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Landing</td><td><code>/data/student/landing/</code></td><td><code>hdfs dfs -put</code></td></tr>
+        <tr><td>Curated</td><td><code>/data/student/curated/student_course_performance/</code></td><td><code>spark/01_ingest_clean.py</code></td></tr>
+        <tr><td>Mart (features)</td><td><code>/data/student/mart/student_features/</code></td><td><code>spark/02_build_features.py</code></td></tr>
+        <tr><td>Mart (risk)</td><td><code>/data/student/mart/risk_flags/</code></td><td><code>spark/03_risk_flags.py</code></td></tr>
+      </tbody>
+    </table>
+    <p>Curated and mart data are <strong>Parquet</strong>, partitioned by <code>course_id=MAT|POR</code>.</p>
+
+    <h2>Spark jobs</h2>
+    <h3>01 — Ingest &amp; clean</h3>
+    <p>Read CSVs from landing, normalize column names, cast types, add <code>course_id</code> and <code>source_file</code>.
+      <code>student_key</code> is SHA-256 over demographic fields (anonymized join key, no PII).</p>
+
+    <h3>02 — Build features</h3>
+    <p>Course-level stats (avg G3, 75th percentile absences), school-level avg G3, plus
+      <code>grade_avg</code>, <code>grade_trend</code> (G3 − G1), absence/study bands, support counts, ranks.</p>
+
+    <h3>03 — Risk flags</h3>
+    <p>Five boolean rules summed into <code>risk_score</code>, mapped to <code>risk_level</code> and human-readable <code>warning_reasons</code>.</p>
+
+    <h2>Warning rules</h2>
+    <table>
+      <thead>
+        <tr><th>Flag</th><th>Condition</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Low final grade</td><td>G3 &lt; 10</td></tr>
+        <tr><td>Declining grade</td><td>G3 − G1 ≤ −3</td></tr>
+        <tr><td>High absences</td><td>absences ≥ 10 OR ≥ course 75th percentile</td></tr>
+        <tr><td>Previous failures</td><td>failures &gt; 0</td></tr>
+        <tr><td>Low study time</td><td>studytime ≤ 1</td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr><th>Risk level</th><th>Rule</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="risk-high"><strong>HIGH</strong></td><td>3 or more flags (risk_score ≥ 3)</td></tr>
+        <tr><td class="risk-medium"><strong>MEDIUM</strong></td><td>Exactly 2 flags</td></tr>
+        <tr><td class="risk-low"><strong>LOW</strong></td><td>0 or 1 flag</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Hive</h2>
+    <p>Database <code>student_warn</code> with external tables over HDFS Parquet:</p>
+    <ul>
+      <li><code>student_course_performance</code>, <code>student_features</code>, <code>risk_flags</code></li>
+      <li>Views: <code>v_at_risk_students</code>, <code>v_course_risk_summary</code>, <code>v_school_risk_summary</code></li>
+    </ul>
+    <p>Demo SQL (<code>hive/04_demo_queries.hql</code>) shows row counts, top at-risk students, course/school rollups, and per-rule contribution counts.</p>
+
+    <h2>Run the demo locally</h2>
+    <p>Host needs only Docker or Podman—Hadoop, Spark, and Hive run inside the project container. Runtime state goes to <code>.runtime/</code> (gitignored).</p>
+    <pre>bash scripts/demo_container.sh</pre>
+    <p>Steps inside the container:</p>
+    <ol>
+      <li>Start single-node HDFS; init Derby Hive metastore</li>
+      <li>Upload CSVs to landing</li>
+      <li>Run three Spark jobs</li>
+      <li>Create Hive tables/views; run demo queries</li>
+    </ol>
+
+    <h2>Review talking points</h2>
+    <ul>
+      <li>Medallion-style zones: raw landing vs typed curated vs analytics mart</li>
+      <li>Parquet + <code>course_id</code> partitioning for efficient course-scoped reads</li>
+      <li>Spark for scalable transforms; Hive as SQL layer over external files</li>
+      <li>Explainable rules—every flag inspectable in SQL and Spark code</li>
+      <li>Privacy: hashed <code>student_key</code>; views expose masked <code>student_id_masked</code></li>
+    </ul>
+
+    <h2>Repository map</h2>
+    <table>
+      <thead>
+        <tr><th>Path</th><th>Role</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>README.md</code></td><td>Review script and manual cluster commands</td></tr>
+        <tr><td><code>scripts/demo_container.sh</code></td><td>Build image, run full demo</td></tr>
+        <tr><td><code>spark/*.py</code></td><td>ETL and risk logic</td></tr>
+        <tr><td><code>hive/*.hql</code></td><td>DDL, views, demo queries</td></tr>
+        <tr><td><code>infra/container/</code></td><td>Containerfile, Hadoop/Hive config</td></tr>
+        <tr><td><code>hdfs/paths.md</code></td><td>Path layout reference</td></tr>
+      </tbody>
+    </table>
+
+    <footer>
+      Student Performance Warning System — generated for project review.
+      Stack versions in container: Hadoop 3.3.6, Spark 3.5.1, Hive 3.1.3.
+    </footer>
+  </main>
+</body>
+</html>
