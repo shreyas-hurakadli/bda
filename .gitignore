@@ -5,3 +5,5 @@ spark-warehouse/
 *.log
 __pycache__/
 .resume
+/docs/
+/diagrams/
